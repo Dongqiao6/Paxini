@@ -1,8 +1,9 @@
 # Paxini 工作目录
 
-> GitHub 仓库只提交源码和说明文档。`.venv/`、`Dex_Quest/recordings/`、
-> SDK 安装包、`PXDex/` 和 `PXCap/` 中体积较大的产品资料保留在本机，
-> 不纳入版本控制。克隆仓库后，请从官方渠道获取 SDK 安装包。
+> GitHub 仓库只提交源码和说明文档。SDK 安装包作为
+> [`sdk-v1.0.0` Release](https://github.com/Dongqiao6/Paxini/releases/tag/sdk-v1.0.0)
+> 的附件提供。`.venv/`、`Dex_Quest/recordings/`、`PXDex/` 和 `PXCap/`
+> 保留在本机，不纳入版本控制。
 
 ## 目录
 
@@ -13,13 +14,54 @@ Paxini/
 ├── py_demo/         # PXDex 基础测试、运动和相机示例
 ├── sdk/
 │   ├── xrobotoolkit/# XRoboToolKit APK 与 PC Service 安装包
-│   └── pxhandsdk/   # PXDex 安装包
+│   └── pxhandsdk/   # PXDex SDK 安装包
 ├── PXDex/           # PXDex 产品资料、SDK 文档和 URDF
 └── PXCap/           # PXCap 产品资料和 URDF
 ```
 
-其中 `.venv/`、安装包、`PXDex/`、`PXCap/` 和采集输出仅存在于本机，
-不会出现在 GitHub 仓库中。
+`sdk/` 中的安装包从 GitHub Release 下载到对应子目录后使用，不会直接提交
+到 Git 仓库。`.venv/`、`PXDex/`、`PXCap/` 和采集输出也仅保留在本机。
+
+## SDK 安装包
+
+三个安装包统一发布在
+[`sdk-v1.0.0` Release](https://github.com/Dongqiao6/Paxini/releases/tag/sdk-v1.0.0)。
+
+| 安装包 | 用途 | 仓库内放置位置 | 使用该包的程序 |
+|---|---|---|---|
+| [pxhandsdk_1.0.0.0.ubantu2204_amd64.deb](https://github.com/Dongqiao6/Paxini/releases/download/sdk-v1.0.0/pxhandsdk_1.0.0.0.ubantu2204_amd64.deb) | PXDex III 的 C++/Python 驱动和系统级 Python 包 | `sdk/pxhandsdk/` | `py_demo/`、`Dex_Quest/` |
+| [XRoboToolkit_PC_Service_1.0.0_ubuntu_22.04_amd64.deb](https://github.com/Dongqiao6/Paxini/releases/download/sdk-v1.0.0/XRoboToolkit_PC_Service_1.0.0_ubuntu_22.04_amd64.deb) | 在 Ubuntu PC 上接收 Quest 跟踪数据，供 Python SDK 查询 | `sdk/xrobotoolkit/` | `Dex_Quest/quest3.py`、`Dex_Quest/collect_hand_pose.py` |
+| [XRoboToolkit-Quest-1.0.1.apk](https://github.com/Dongqiao6/Paxini/releases/download/sdk-v1.0.0/XRoboToolkit-Quest-1.0.1.apk) | 安装在 Quest 3 中，采集并发送手柄和手部 6D pose | `sdk/xrobotoolkit/` | `Dex_Quest/collect_hand_pose.py` 的 Quest 数据源 |
+
+下载后先校验文件完整性：
+
+```bash
+cd /home/carrie/my_project/Paxini
+sha256sum -c sdk/SHA256SUMS
+```
+
+在 Ubuntu 22.04 PC 上安装两个 DEB。`apt` 会自动处理系统依赖：
+
+```bash
+sudo apt install \
+  ./sdk/xrobotoolkit/XRoboToolkit_PC_Service_1.0.0_ubuntu_22.04_amd64.deb \
+  ./sdk/pxhandsdk/pxhandsdk_1.0.0.0.ubantu2204_amd64.deb
+
+sudo /usr/share/pxhandsdk/scripts/setup-serial-access.sh
+```
+
+`pxhandsdk` 必须安装到系统 Python，不能从 PyPI 安装同名包。安装串口权限脚本
+后需要重新登录，`py_demo/` 才能访问 `/dev/ttyUSB*`。
+
+通过 USB ADB 将 Quest APK 安装到头显：
+
+```bash
+adb devices
+adb install -r sdk/xrobotoolkit/XRoboToolkit-Quest-1.0.1.apk
+```
+
+`Dex_Quest/` 还需要通过 pip 安装 Python 侧的 `xrobotoolkit-sdk`；它是代码依赖，
+与上面的 PC Service 安装包不同。
 
 ## Python 环境
 
