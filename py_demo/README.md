@@ -2,11 +2,12 @@
 
 本指南面向第一次接触 PXDex III 三指执行器的同学。跟着下面的步骤，你可以在半小时内完成环境搭建、连接设备、读取状态，并让手指安全地动起来。
 
-目录里的三个脚本：
+目录中的主要入口：
 
 - `test.py`：最小的只读示例，验证连接和状态读取。
 - `move_demo.py`：完整的运动演示，包含回零、使能、两段角度运动和断开。
 - `camera.py`：可选的双摄像头画面预览工具，与 PXDex 控制无关。
+- `Cap_demo/`：zw 提供的 PXCap3 触觉、编码器和双腕部相机示例。
 
 ---
 
@@ -72,6 +73,25 @@ python -c "import pxhandsdk; print('SDK OK')"
 | `test.py` | 连接设备，读取固件版本和当前位置 | 否 |
 | `move_demo.py` | 回零、使能、执行两段角度运动后张开 | 是 |
 | `camera.py` | 打开两个摄像头并拼接显示 | 否 |
+
+### PXCap3 示例
+
+`Cap_demo/` 提供 PXCap3 的实时数据采集和双腕部相机预览：
+
+```bash
+cd Cap_demo
+
+# 终端 A：触觉、分布力点数、编码器和关节角
+python pxcap3_demo.py /dev/ttyACM0 --frequency 100
+
+# 终端 B：枚举并预览两路腕部相机
+python camera_preview.py --list
+python camera_preview.py
+```
+
+`camera_preview_ui.py` 和 `camera_controls.py` 由预览入口自动使用。串口和视频节点
+会随设备插拔变化，完整说明见
+[Cap_demo/PXCap3_设备启动与程序说明.md](Cap_demo/PXCap3_设备启动与程序说明.md)。
 
 ---
 
